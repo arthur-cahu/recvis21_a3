@@ -8,7 +8,7 @@ from torch.autograd import Variable
 from tqdm import tqdm
 
 from data import data_transforms
-from model import Net
+from model import KNOWN_MODELS, make_model
 
 
 def train(model, device, train_loader, optimizer, epoch):
@@ -69,6 +69,9 @@ if __name__ == '__main__':
                         help='how many batches to wait before logging training status')
     parser.add_argument('--experiment', type=str, default='experiment', metavar='E',
                         help='folder where experiment outputs are located.')
+    parser.add_argument('--model-name', type=str, default='efficientnet', metavar='MN',
+                        help=f'model name; one of {", ".join(KNOWN_MODELS.keys())} (default: efficientnet).')
+
     args = parser.parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(args.seed)
@@ -89,8 +92,8 @@ if __name__ == '__main__':
         batch_size=args.batch_size, shuffle=False, num_workers=1)
 
     # Neural network and optimizer
-    model = Net()
     print(f'Using {device}')
+    model = make_model(args.model_name)
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr,
                           momentum=args.momentum)
@@ -98,7 +101,8 @@ if __name__ == '__main__':
     for epoch in range(1, args.epochs + 1):
         train(model, device, train_loader, optimizer, epoch)
         validation(model, device, val_loader)
-        model_file = args.experiment + '/model_' + str(epoch) + '.pth'
+        model_file = os.path.join(args.experiment,
+                                  args.model_name + "_" + str(epoch) + '.pth')
         torch.save(model.state_dict(), model_file)
         print('Saved model to ' + model_file + '. You can run `python evaluate.py --model ' +
               model_file + '` to generate the Kaggle formatted csv file\n')

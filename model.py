@@ -1,22 +1,41 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.models as models
 
-nclasses = 20 
+nClasses = 20
 
-class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
-        self.conv3 = nn.Conv2d(20, 20, kernel_size=5)
-        self.fc1 = nn.Linear(320, 50)
-        self.fc2 = nn.Linear(50, nclasses)
+KNOWN_MODELS = {
+    "resnet": {
+        "constructor": models.resnet50,
+        "head": "fc"
+    },
+    "efficientnet": {
+        "constructor": models.efficientnet_b7,
+        "head": "clf_sequential"
+    },
+}
 
-    def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2(x), 2))
-        x = F.relu(F.max_pool2d(self.conv3(x), 2))
-        x = x.view(-1, 320)
-        x = F.relu(self.fc1(x))
-        return self.fc2(x)
+
+def replace_head(model, model_name):
+    if KNOWN_MODELS[model_name]["head"] == "fc":
+        nFeatures = model.fc.in_features
+        model.fc = nn.Linear(nFeatures, nClasses)
+    elif KNOWN_MODELS[model_name]["head"] == "clf_sequential":
+        nFeatures = model.classifier[-1].in_features
+        model.classifier[-1] = nn.Linear(nFeatures, nClasses)
+    else:
+        raise ValueError("Unkown classifier head.")
+
+
+def make_model(model_name, finetuning=True, pretrained=True):
+    if not model_name in KNOWN_MODELS:
+        raise ValueError(f'Unknown model `{model_name}`.')
+    # construct the model:
+    model = KNOWN_MODELS[model_name]["constructor"](pretrained=pretrained)
+    # freeze weights if we want to do transfer learning instead of finetuning:
+    if not finetuning:
+        for param in model.parameters():
+            param.requires_grad = False
+    replace_head(model, model_name)
+    return model
