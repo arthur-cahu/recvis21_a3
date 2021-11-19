@@ -71,6 +71,8 @@ if __name__ == '__main__':
                         help='folder where experiment outputs are located.')
     parser.add_argument('--model-name', type=str, default='efficientnet', metavar='MN',
                         help=f'model name; one of {", ".join(KNOWN_MODELS.keys())} (default: efficientnet).')
+    parser.add_argument('--dry-run', action='store_true', default=False,
+                        help='whether just print the model after building it, then exit (default: False).')
 
     args = parser.parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -94,6 +96,11 @@ if __name__ == '__main__':
     # Neural network and optimizer
     print(f'Using {device}')
     model = make_model(args.model_name)
+
+    if args.dry_run:
+        print(f"Model: {model}")
+        print("Dry run, exiting.")
+        exit()
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr,
                           momentum=args.momentum)
