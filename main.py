@@ -28,7 +28,7 @@ def train(model, device, train_loader, optimizer, epoch):
                 100. * batch_idx / len(train_loader), loss.data.item()))
 
 
-def validation(model, device, val_loader):
+def validation(model, device, val_loader, scheduler):
     model.to(device)
     model.eval()
     validation_loss = 0
@@ -44,7 +44,8 @@ def validation(model, device, val_loader):
         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
     validation_loss /= len(val_loader.dataset)
-    print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
+    scheduler.step(validation_loss)
+    print('Validation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
         validation_loss, correct, len(val_loader.dataset),
         100. * correct / len(val_loader.dataset)))
 
@@ -60,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=10, metavar='N',
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
-                        help='learning rate (default: 0.01)')
+                        help='initial learning rate (default: 0.1)')
     parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                         help='SGD momentum (default: 0.5)')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -93,7 +94,7 @@ if __name__ == '__main__':
                              transform=val_transforms),
         batch_size=args.batch_size, shuffle=False, num_workers=1)
 
-    # Neural network and optimizer
+    # Neural network, optimizer and scheduler
     print(f'Using {device}')
     model = make_model(args.model_name)
 
@@ -104,10 +105,11 @@ if __name__ == '__main__':
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr,
                           momentum=args.momentum)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', verbose=True, factor=0.5, patience=2)
 
     for epoch in range(1, args.epochs + 1):
         train(model, device, train_loader, optimizer, epoch)
-        validation(model, device, val_loader)
+        validation(model, device, val_loader, scheduler)
         model_file = os.path.join(args.experiment,
                                   args.model_name + "_" + str(epoch) + '.pth')
         torch.save(model.state_dict(), model_file)
