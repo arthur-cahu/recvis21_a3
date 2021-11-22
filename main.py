@@ -14,18 +14,16 @@ from model import KNOWN_MODELS, make_model
 def train(model, device, train_loader, optimizer, epoch):
     model.to(device)
     model.train()
-    for batch_idx, (data, target) in enumerate(train_loader):
+    it = tqdm(train_loader, desc=f"Epoch {epoch}")
+    for data, target in it:
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
         criterion = torch.nn.CrossEntropyLoss(reduction='mean')
         loss = criterion(output, target)
         loss.backward()
+        it.set_postfix_str(f"loss={loss.item():.03f}")
         optimizer.step()
-        if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.data.item()))
 
 
 def validation(model, device, val_loader, scheduler):
@@ -113,5 +111,4 @@ if __name__ == '__main__':
         model_file = os.path.join(args.experiment,
                                   args.model_name + "_" + str(epoch) + '.pth')
         torch.save(model.state_dict(), model_file)
-        print('Saved model to ' + model_file + '. You can run `python evaluate.py --model ' +
-              model_file + '` to generate the Kaggle formatted csv file\n')
+        print('Saved model to ' + model_file + '.\n')
