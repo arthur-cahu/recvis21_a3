@@ -22,7 +22,7 @@ args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
 
 state_dict = torch.load(args.model)
-model = make_model(args.model_name)
+model = make_model(args.model_name, pretrained=False)
 model.load_state_dict(state_dict)
 model.eval()
 if use_cuda:
