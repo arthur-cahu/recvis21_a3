@@ -79,7 +79,7 @@ if __name__ == '__main__':
     parser.add_argument('--model-name', type=str, default='efficientnet', metavar='MN',
                         help=f'model name; one of {", ".join(KNOWN_MODELS.keys())} (default: efficientnet).')
     parser.add_argument('--dry-run', action='store_true', default=False,
-                        help='when enabled, prints the model after building it, then exit (default: False).')
+                        help='when enabled, prints the model after building it, then exits (default: False).')
     parser.add_argument('--freeze-weights', action='store_true', default=False,
                         help='when enabled, freezes the hidden weights and only trains the classifier head, as opposed to fine-tuning the entire model (default: False).')
 
