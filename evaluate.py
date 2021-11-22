@@ -31,8 +31,7 @@ if use_cuda:
 else:
     print('Using CPU')
 
-test_dir = os.path.join(args.data, '/test_images/mistery_category')
-
+test_dir = os.path.join(args.data, 'test_images/mistery_category')
 
 def pil_loader(path):
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
