@@ -7,7 +7,7 @@ from torchvision import datasets
 from torch.autograd import Variable
 from tqdm import tqdm
 
-from data import data_transforms
+from data import train_transforms, val_transforms
 from model import KNOWN_MODELS, make_model
 
 
@@ -86,11 +86,11 @@ if __name__ == '__main__':
 
     train_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(args.data + '/train_images',
-                             transform=data_transforms),
+                             transform=train_transforms),
         batch_size=args.batch_size, shuffle=True, num_workers=1)
     val_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(args.data + '/val_images',
-                             transform=data_transforms),
+                             transform=val_transforms),
         batch_size=args.batch_size, shuffle=False, num_workers=1)
 
     # Neural network and optimizer

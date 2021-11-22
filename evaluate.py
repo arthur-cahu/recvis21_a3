@@ -5,7 +5,7 @@ import PIL.Image as Image
 
 import torch
 
-from model import Net
+from data import val_transforms
 
 parser = argparse.ArgumentParser(description='RecVis A3 evaluation script')
 parser.add_argument('--data', type=str, default='bird_dataset', metavar='D',
@@ -28,9 +28,8 @@ if use_cuda:
 else:
     print('Using CPU')
 
-from data import data_transforms
+test_dir = os.path.join(args.data, '/test_images/mistery_category')
 
-test_dir = args.data + '/test_images/mistery_category'
 
 def pil_loader(path):
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
@@ -43,7 +42,7 @@ output_file = open(args.outfile, "w")
 output_file.write("Id,Category\n")
 for f in tqdm(os.listdir(test_dir)):
     if 'jpg' in f:
-        data = data_transforms(pil_loader(test_dir + '/' + f))
+        data = val_transforms(pil_loader(os.path.join(test_dir, f)))
         data = data.view(1, data.size(0), data.size(1), data.size(2))
         if use_cuda:
             data = data.cuda()
