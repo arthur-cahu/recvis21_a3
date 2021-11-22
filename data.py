@@ -12,8 +12,10 @@ train_transforms = transforms.Compose([
                            saturation=0.1, hue=0),
     # hue is very important in determining bird species
     transforms.RandomRotation(10, expand=False),
-    transforms.RandomResizedCrop(448),
+    transforms.RandomPerspective(distortion_scale=0.3, p=0.5),
     transforms.ToTensor(),
+    transforms.RandomErasing(p=0.5),
+    transforms.RandomResizedCrop(448),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225])
 ])
