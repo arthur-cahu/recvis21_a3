@@ -47,6 +47,14 @@ def validation(model, device, val_loader, scheduler):
         validation_loss, correct, len(val_loader.dataset),
         100. * correct / len(val_loader.dataset)))
 
+def param_count(model):
+    param_count = 0
+    for param in model.parameters():
+        dimensions = 1
+        for dim in param.size():
+            dimensions *= dim
+        param_count += dimensions
+    return param_count
 
 if __name__ == '__main__':
 
@@ -100,6 +108,7 @@ if __name__ == '__main__':
 
     if args.dry_run:
         print(f"Model: {model}")
+        print(f"Parameter count: {param_count(model)}")
         print("Dry run, exiting.")
         exit()
 
