@@ -71,7 +71,9 @@ if __name__ == '__main__':
     parser.add_argument('--model-name', type=str, default='efficientnet', metavar='MN',
                         help=f'model name; one of {", ".join(KNOWN_MODELS.keys())} (default: efficientnet).')
     parser.add_argument('--dry-run', action='store_true', default=False,
-                        help='whether just print the model after building it, then exit (default: False).')
+                        help='when enabled, prints the model after building it, then exit (default: False).')
+    parser.add_argument('--freeze-weights', action='store_true', default=False,
+                        help='when enabled, freezes the hidden weights and only trains the classifier head, as opposed to fine-tuning the entire model (default: False).')
 
     args = parser.parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -94,7 +96,7 @@ if __name__ == '__main__':
 
     # Neural network, optimizer and scheduler
     print(f'Using {device}')
-    model = make_model(args.model_name)
+    model = make_model(args.model_name, finetuning=not args.freeze_weights)
 
     if args.dry_run:
         print(f"Model: {model}")
@@ -103,7 +105,8 @@ if __name__ == '__main__':
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr,
                           momentum=args.momentum)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', verbose=True, factor=0.5, patience=2)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, 'min', verbose=True, factor=0.5, patience=2)
 
     for epoch in range(1, args.epochs + 1):
         train(model, device, train_loader, optimizer, epoch)
