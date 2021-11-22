@@ -5,6 +5,7 @@ import PIL.Image as Image
 
 import torch
 
+from model import KNOWN_MODELS, make_model
 from data import val_transforms
 
 parser = argparse.ArgumentParser(description='RecVis A3 evaluation script')
@@ -14,12 +15,14 @@ parser.add_argument('--model', type=str, metavar='M',
                     help="the model file to be evaluated. Usually it is of the form model_X.pth")
 parser.add_argument('--outfile', type=str, default='experiment/kaggle.csv', metavar='D',
                     help="name of the output csv file")
+parser.add_argument('--model-name', type=str, default='efficientnet', metavar='MN',
+                    help=f'model name; one of {", ".join(KNOWN_MODELS.keys())} (default: efficientnet).')
 
 args = parser.parse_args()
 use_cuda = torch.cuda.is_available()
 
 state_dict = torch.load(args.model)
-model = Net()
+model = make_model(args.model_name)
 model.load_state_dict(state_dict)
 model.eval()
 if use_cuda:
@@ -52,7 +55,5 @@ for f in tqdm(os.listdir(test_dir)):
 
 output_file.close()
 
-print("Succesfully wrote " + args.outfile + ', you can upload this file to the kaggle competition website')
-        
-
-
+print("Succesfully wrote " + args.outfile +
+      ', you can upload this file to the kaggle competition website')
