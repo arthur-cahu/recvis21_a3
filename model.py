@@ -11,7 +11,7 @@ KNOWN_MODELS = {
         "head": "fc"
     },
     "efficientnet": {
-        "constructor": models.efficientnet_b7,
+        "constructor": models.efficientnet_b4,
         "head": "clf_sequential"
     },
 }
