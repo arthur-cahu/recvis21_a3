@@ -14,6 +14,14 @@ KNOWN_MODELS = {
         "constructor": models.efficientnet_b4,
         "head": "clf_sequential"
     },
+    "vgg": {
+        "constructor": models.vgg19_bn,
+        "head": "clf_sequential"
+    },
+    "googlenet": {
+        "constructor": models.googlenet,
+        "head": "fc"
+    },
 }
 
 
